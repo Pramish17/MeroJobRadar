@@ -1,0 +1,17 @@
+{
+  "name": "mero-job-radar",
+  "version": "1.0.0",
+  "description": "Mero Job Radar — London IT job aggregator with visa sponsorship tracking",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\" --names \"server,client\" --prefix-colors \"cyan,magenta\"",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev",
+    "build": "cd client && npm run build",
+    "start": "cd server && node src/index.js",
+    "postinstall": "cd server && npm install && cd ../client && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

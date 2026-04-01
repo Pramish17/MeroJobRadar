@@ -1,0 +1,16 @@
+node_modules/
+server/data/
+client/dist/
+.env
+*.db
+*.db-shm
+*.db-wal
+.DS_Store
+Thumbs.db
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.env.local
+.env.*.local
+dist/
+build/
