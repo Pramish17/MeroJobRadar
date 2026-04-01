@@ -9,9 +9,9 @@ export default function StatsPanel({ stats, loading }) {
       dot: 'bg-blue-500',
     },
     {
-      label: 'Likely Sponsors',
+      label: 'Visa Sponsored',
       value: stats?.sponsors ?? '—',
-      sub: 'on UK visa register',
+      sub: 'UK register · worldwide',
       color: 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800',
       valueColor: 'text-emerald-700 dark:text-emerald-300',
       dot: 'bg-emerald-500',
@@ -29,21 +29,14 @@ export default function StatsPanel({ stats, loading }) {
   return (
     <div className="grid grid-cols-3 gap-3 mb-6">
       {cards.map((card) => (
-        <div
-          key={card.label}
-          className={`rounded-xl border p-4 ${card.color} transition-all`}
-        >
+        <div key={card.label} className={`rounded-xl border p-4 ${card.color} transition-all`}>
           <div className="flex items-center gap-2 mb-1">
             <span className={`w-2 h-2 rounded-full ${card.dot}`} />
             <span className="text-xs font-medium text-sand-600 dark:text-sand-400 uppercase tracking-wide">
               {card.label}
             </span>
           </div>
-          <div
-            className={`font-mono text-3xl font-bold ${card.valueColor} ${
-              loading ? 'animate-pulse-soft' : ''
-            }`}
-          >
+          <div className={`font-mono text-3xl font-bold ${card.valueColor} ${loading ? 'animate-pulse-soft' : ''}`}>
             {loading ? '···' : (stats ? card.value.toLocaleString() : '—')}
           </div>
           <div className="text-xs text-sand-500 dark:text-sand-500 mt-1">{card.sub}</div>

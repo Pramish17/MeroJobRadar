@@ -10,6 +10,7 @@ router.get('/', (req, res) => {
     const {
       search,
       source,
+      location,
       sponsorship,
       dateFrom,
       saved,
@@ -20,6 +21,7 @@ router.get('/', (req, res) => {
     const result = getJobs({
       search,
       source,
+      location,
       sponsorship: sponsorship === 'true',
       dateFrom,
       saved: saved === 'true',

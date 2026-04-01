@@ -41,7 +41,6 @@ app.get('/api/health', (_req, res) => {
     env: process.env.NODE_ENV || 'development',
     timestamp: new Date().toISOString(),
     keys: {
-      reed: !!process.env.REED_API_KEY,
       adzuna: !!(process.env.ADZUNA_APP_ID && process.env.ADZUNA_APP_KEY),
       anthropic: !!process.env.ANTHROPIC_API_KEY,
     },

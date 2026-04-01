@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS jobs (
   salary_max INTEGER,
   description TEXT,
   url TEXT NOT NULL,
-  source TEXT NOT NULL CHECK(source IN ('reed', 'adzuna')),
+  source TEXT NOT NULL,
   tags TEXT,
   sponsorship INTEGER DEFAULT 0,
   type TEXT DEFAULT 'Full-time',

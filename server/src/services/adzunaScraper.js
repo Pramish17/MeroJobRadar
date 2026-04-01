@@ -2,6 +2,7 @@ import { randomUUID } from 'crypto';
 import { extractTags } from '../utils/tagExtractor.js';
 
 const ADZUNA_BASE = 'https://api.adzuna.com/v1/api/jobs/gb/search/1';
+
 const KEYWORDS = [
   'software engineer',
   'java developer',
@@ -11,6 +12,17 @@ const KEYWORDS = [
   'data engineer',
   'full stack developer',
   'QA engineer',
+];
+
+const UK_LOCATIONS = [
+  { label: 'London', slug: 'london' },
+  { label: 'Manchester', slug: 'manchester' },
+  { label: 'Birmingham', slug: 'birmingham' },
+  { label: 'Glasgow', slug: 'glasgow' },
+  { label: 'Edinburgh', slug: 'edinburgh' },
+  { label: 'Cardiff', slug: 'cardiff' },
+  { label: 'Belfast', slug: 'belfast' },
+  { label: 'Leeds', slug: 'leeds' },
 ];
 
 function sleep(ms) {
@@ -60,7 +72,6 @@ function normalizeJob(raw) {
   const description = raw.description || '';
   const tags = extractTags(raw.title || '', description);
 
-  // Determine contract type
   let type = 'Full-time';
   if (raw.contract_time === 'part_time') type = 'Part-time';
   else if (raw.contract_type === 'contract') type = 'Contract';
@@ -71,7 +82,7 @@ function normalizeJob(raw) {
     externalId: String(raw.id),
     title: raw.title || 'Untitled',
     company: raw.company?.display_name || 'Unknown Company',
-    location: raw.location?.display_name || 'London',
+    location: raw.location?.display_name || 'United Kingdom',
     salary: formatSalary(raw.salary_min, raw.salary_max),
     salaryMin: raw.salary_min ? Math.round(raw.salary_min) : null,
     salaryMax: raw.salary_max ? Math.round(raw.salary_max) : null,
@@ -98,44 +109,46 @@ export async function scrapeAdzuna() {
   const allJobs = [];
   const seenIds = new Set();
 
-  for (const keyword of KEYWORDS) {
-    try {
-      const params = new URLSearchParams({
-        app_id: appId,
-        app_key: appKey,
-        results_per_page: '50',
-        what: keyword,
-        where: 'london',
-        sort_by: 'date',
-      });
+  for (const { label, slug } of UK_LOCATIONS) {
+    for (const keyword of KEYWORDS) {
+      try {
+        const params = new URLSearchParams({
+          app_id: appId,
+          app_key: appKey,
+          results_per_page: '50',
+          what: keyword,
+          where: slug,
+          sort_by: 'date',
+        });
 
-      const url = `${ADZUNA_BASE}?${params}`;
-      console.log(`[Adzuna] Fetching: "${keyword}"`);
+        const url = `${ADZUNA_BASE}?${params}`;
+        console.log(`[Adzuna] Fetching: "${keyword}" in ${label}`);
 
-      const res = await fetchWithRetry(url);
+        const res = await fetchWithRetry(url);
 
-      if (!res.ok) {
-        console.error(`[Adzuna] HTTP ${res.status} for keyword "${keyword}"`);
-        await sleep(1000);
-        continue;
-      }
-
-      const data = await res.json();
-      const results = data.results || [];
-
-      for (const raw of results) {
-        if (!seenIds.has(raw.id)) {
-          seenIds.add(raw.id);
-          allJobs.push(normalizeJob(raw));
+        if (!res.ok) {
+          console.error(`[Adzuna] HTTP ${res.status} for "${keyword}" in ${label}`);
+          await sleep(1000);
+          continue;
         }
+
+        const data = await res.json();
+        const results = data.results || [];
+
+        for (const raw of results) {
+          if (!seenIds.has(raw.id)) {
+            seenIds.add(raw.id);
+            allJobs.push(normalizeJob(raw));
+          }
+        }
+
+        console.log(`[Adzuna] "${keyword}" in ${label} → ${results.length} results (${allJobs.length} total so far)`);
+      } catch (err) {
+        console.error(`[Adzuna] Error fetching "${keyword}" in ${label}: ${err.message}`);
       }
 
-      console.log(`[Adzuna] "${keyword}" → ${results.length} results (${allJobs.length} total so far)`);
-    } catch (err) {
-      console.error(`[Adzuna] Error fetching "${keyword}": ${err.message}`);
+      await sleep(500);
     }
-
-    await sleep(1000);
   }
 
   console.log(`[Adzuna] Scrape complete. Total unique jobs: ${allJobs.length}`);

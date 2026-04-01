@@ -7,7 +7,9 @@
       "Read(//c/Users/prami/.claude/projects/C--Users-prami-Desktop-Projects-MeroJobRadar/memory//**)",
       "Read(//c/Users/prami/.claude/projects/C--Users-prami-Desktop-Projects-MeroJobRadar/memory/**)",
       "Bash(netstat -ano)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(xargs wc:*)",
+      "Bash(__NEW_LINE_b3a5b5456fc34aeb__ node -e \":*)"
     ]
   }
 }

@@ -1,5 +1,17 @@
 import { useState } from 'react';
 
+const SOURCE_STYLES = {
+  adzuna:    'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
+  remotive:  'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400',
+  arbeitnow: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400',
+  remoteok:  'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400',
+  default:   'bg-sand-100 dark:bg-sand-700 text-sand-600 dark:text-sand-400',
+};
+const SOURCE_LABELS = {
+  adzuna: 'Adzuna', remotive: 'Remotive', arbeitnow: 'Arbeitnow',
+  remoteok: 'RemoteOK',
+};
+
 // Deterministic color from company name
 function companyColor(name = '') {
   const colors = [
@@ -91,14 +103,8 @@ export default function JobCard({ job, onToggleSave }) {
                     VISA ✓
                   </span>
                 )}
-                <span
-                  className={`px-1.5 py-0.5 rounded text-xs font-medium ${
-                    job.source === 'reed'
-                      ? 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400'
-                      : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
-                  }`}
-                >
-                  {job.source === 'reed' ? 'Reed' : 'Adzuna'}
+                <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${SOURCE_STYLES[job.source] ?? SOURCE_STYLES.default}`}>
+                  {SOURCE_LABELS[job.source] ?? job.source}
                 </span>
               </div>
             </div>

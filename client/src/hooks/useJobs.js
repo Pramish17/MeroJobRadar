@@ -48,6 +48,7 @@ export function useJobs(filters = {}) {
   }, [
     filters.search,
     filters.source,
+    filters.location,
     filters.sponsorship,
     filters.dateFrom,
     filters.saved,
