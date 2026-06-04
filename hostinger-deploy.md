@@ -57,7 +57,6 @@ In the Node.js app settings → **Environment Variables**, add:
 | `REED_API_KEY` | your Reed API key |
 | `ADZUNA_APP_ID` | your Adzuna App ID |
 | `ADZUNA_APP_KEY` | your Adzuna App Key |
-| `ANTHROPIC_API_KEY` | your Anthropic key (optional) |
 
 ### Step 6: Deploy
 
@@ -172,8 +171,7 @@ The response includes:
   "status": "ok",
   "keys": {
     "reed": true,
-    "adzuna": true,
-    "anthropic": false
+    "adzuna": true
   }
 }
 ```

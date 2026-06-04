@@ -42,7 +42,6 @@ app.get('/api/health', (_req, res) => {
     timestamp: new Date().toISOString(),
     keys: {
       adzuna: !!(process.env.ADZUNA_APP_ID && process.env.ADZUNA_APP_KEY),
-      anthropic: !!process.env.ANTHROPIC_API_KEY,
     },
   });
 });

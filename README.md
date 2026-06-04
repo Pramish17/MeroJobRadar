@@ -10,7 +10,6 @@ A production-ready full-stack job aggregator for Software Engineering / IT roles
 - **Visa sponsorship tracking** — Companies cross-referenced against the UK Home Office sponsor register
 - **Full-text search** — Search across title, company, and tech tags
 - **Smart filtering** — Filter by source, date posted, sponsorship status, and saved jobs
-- **AI Career Advisor** — Claude-powered Q&A about the job listings (optional)
 - **Auto-deduplication** — Levenshtein distance matching prevents duplicate listings
 - **Auto-cleanup** — Jobs older than 30 days are removed on each fetch cycle
 - **Dark mode** — Automatic system preference detection
@@ -56,12 +55,6 @@ Open http://localhost:5173 — the frontend proxies API calls to port 3001.
    ADZUNA_APP_ID=your_app_id
    ADZUNA_APP_KEY=your_app_key
    ```
-
-### Anthropic API (optional — for AI Advisor)
-1. Get a key at https://console.anthropic.com/
-2. Add to `server/.env`: `ANTHROPIC_API_KEY=your_key_here`
-3. Also add to `client/.env`: `VITE_ANTHROPIC_API_KEY=your_key_here`
-   > Note: The AI Advisor calls Anthropic directly from the browser. Only do this in a private/personal deployment.
 
 ## Available Scripts
 

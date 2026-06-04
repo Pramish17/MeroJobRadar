@@ -1,10 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useJobs } from './hooks/useJobs.js';
 import StatsPanel from './components/StatsPanel.jsx';
 import SearchBar from './components/SearchBar.jsx';
 import FilterBar from './components/FilterBar.jsx';
 import JobCard from './components/JobCard.jsx';
-import AiAdvisor from './components/AiAdvisor.jsx';
 
 const BASE_FILTERS = {
   search: '',
@@ -17,6 +16,13 @@ const BASE_FILTERS = {
   page: 1,
   limit: 30,
 };
+
+function getInitialTheme() {
+  if (typeof window === 'undefined') return 'light';
+  const storedTheme = window.localStorage.getItem('theme');
+  if (storedTheme === 'light' || storedTheme === 'dark') return storedTheme;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
 
 function todayFormatted() {
   return new Date().toLocaleDateString('en-GB', {
@@ -31,6 +37,19 @@ export default function App() {
   const [activeTab, setActiveTab]           = useState('all');
   const [allFilters, setAllFilters]         = useState(BASE_FILTERS);
   const [sponsoredFilters, setSponsoredFilters] = useState({ ...BASE_FILTERS, sponsorship: true });
+  const [theme, setTheme] = useState(getInitialTheme);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    window.localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
 
   // Sponsored tab always has sponsorship locked to true
   const filters    = activeTab === 'sponsored' ? { ...sponsoredFilters, sponsorship: true } : allFilters;
@@ -55,9 +74,18 @@ export default function App() {
                 Worldwide IT roles · Updated daily · Visa sponsorship tracked
               </p>
             </div>
-            <p className="font-mono text-xs text-sand-400 dark:text-sand-600 mt-1 text-right">
-              {todayFormatted()}
-            </p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="inline-flex items-center gap-2 rounded-lg border border-sand-200 bg-white px-3 py-1.5 text-xs font-semibold text-sand-600 transition-colors hover:bg-sand-50 dark:border-sand-700 dark:bg-sand-800 dark:text-sand-200 dark:hover:bg-sand-700"
+              >
+                {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
+              </button>
+              <p className="font-mono text-xs text-sand-400 dark:text-sand-600 mt-1 text-right">
+                {todayFormatted()}
+              </p>
+            </div>
           </div>
         </header>
 
@@ -114,9 +142,6 @@ export default function App() {
             </span>
           </div>
         )}
-
-        {/* AI Advisor */}
-        <AiAdvisor jobs={jobs} />
 
         {/* Search + Refresh */}
         <SearchBar value={filters.search} onChange={(v) => setFilters((f) => ({ ...f, search: v, page: 1 }))} />
