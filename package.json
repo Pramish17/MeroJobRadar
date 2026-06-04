@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Mero Job Radar — London IT job aggregator with visa sponsorship tracking",
   "private": true,
+  "engines": {
+    "node": ">=20 <21"
+  },
   "scripts": {
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\" --names \"server,client\" --prefix-colors \"cyan,magenta\"",
     "dev:server": "cd server && npm run dev",
