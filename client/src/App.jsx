@@ -257,6 +257,10 @@ export default function App() {
             <a href="https://remoteok.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-sand-600">RemoteOK</a>
           </p>
           <p>Visa sponsorship: UK Home Office register + worldwide job description scan</p>
+          <p>
+            &copy; {new Date().getFullYear()}{' '}
+            <a href="https://pramishthapa.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-sand-600">Pramish Thapa</a>
+          </p>
         </footer>
 
       </div>
