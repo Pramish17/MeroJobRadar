@@ -101,7 +101,7 @@ Open http://localhost:5173 — the frontend proxies API calls to port 3001.
 
 ## Deployment
 
-See [hostinger-deploy.md](hostinger-deploy.md) for step-by-step Hostinger deployment instructions.
+Deploy to Railway by connecting the GitHub repo at [railway.app](https://railway.app). Set `NODE_ENV=production`, `ADZUNA_APP_ID`, and `ADZUNA_APP_KEY` as environment variables.
 
 ## Project Structure
 
