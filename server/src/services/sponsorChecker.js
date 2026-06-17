@@ -108,7 +108,6 @@ export async function loadSponsorList() {
   }
 }
 
-// Phrases that indicate a job explicitly offers visa sponsorship
 const SPONSORSHIP_KEYWORDS = [
   'visa sponsorship', 'visa sponsored', 'sponsor visa', 'sponsoring visa',
   'work permit sponsorship', 'certificate of sponsorship', 'skilled worker visa',
@@ -118,13 +117,67 @@ const SPONSORSHIP_KEYWORDS = [
   'h1b', 'h-1b', 'tier 2', 'tier2',
 ];
 
-/**
- * Check if a job description explicitly mentions visa sponsorship.
- * Works for any country worldwide.
- */
+// Explicit negative compound phrases — checked before any keyword match
+const NEGATIVE_PHRASES = [
+  'visa sponsorship unavailable',
+  'visa sponsorship is not available',
+  'visa sponsorship not available',
+  'no visa sponsorship',
+  'not able to offer visa sponsorship',
+  'unable to offer visa sponsorship',
+  'unable to offer sponsorship',
+  'unable to provide sponsorship',
+  'cannot provide sponsorship',
+  'cannot offer sponsorship',
+  'we do not sponsor',
+  "we don't sponsor",
+  'we cannot sponsor',
+  'we are unable to sponsor',
+  'does not sponsor',
+  "doesn't sponsor",
+  'will not sponsor',
+  "won't sponsor",
+  'not offer sponsorship',
+  'no sponsorship',
+  'sponsorship is not available',
+  'sponsorship not available',
+  'not currently able to sponsor',
+  'unable to support visa',
+  'cannot support visa',
+  'right to work in the uk is required',
+  'must have the right to work',
+  'must already have the right to work',
+];
+
+// Negation words that, when found within 60 chars of a keyword, cancel the match
+const NEGATION_WORDS = [
+  'not', 'no', 'cannot', "can't", 'unable', 'unavailable',
+  'unfortunately', "don't", 'do not', 'does not', "doesn't",
+  'will not', "won't", 'without', 'never',
+];
+
 export function checkSponsorshipFromText(description = '') {
   const lower = description.toLowerCase();
-  return SPONSORSHIP_KEYWORDS.some((kw) => lower.includes(kw));
+
+  // Explicit negatives take priority — bail out immediately
+  if (NEGATIVE_PHRASES.some((phrase) => lower.includes(phrase))) return false;
+
+  // For each keyword match, verify the surrounding context isn't negated
+  for (const kw of SPONSORSHIP_KEYWORDS) {
+    let idx = lower.indexOf(kw);
+    while (idx !== -1) {
+      const window = lower.slice(Math.max(0, idx - 60), idx + kw.length + 60);
+      const negated = NEGATION_WORDS.some((neg) => {
+        const negIdx = window.indexOf(neg);
+        // Only treat as negation if the negation word appears before or closely after the keyword
+        return negIdx !== -1 && negIdx < window.indexOf(kw) + kw.length + 20;
+      });
+      if (!negated) return true;
+      idx = lower.indexOf(kw, idx + 1);
+    }
+  }
+
+  return false;
 }
 
 /**
