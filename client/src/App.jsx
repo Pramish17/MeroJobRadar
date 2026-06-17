@@ -57,7 +57,7 @@ export default function App() {
 
   const { jobs, stats, loading, refreshing, error, pagination, toggleSave, refresh } = useJobs(filters);
 
-  const noJobsYet = !loading && !error && stats?.total === 0 && !stats?.scheduler?.lastRunAt;
+  const noJobsYet = !loading && !error && stats?.total === 0;
 
   return (
     <div className="min-h-screen bg-sand-50 dark:bg-sand-900">
@@ -178,14 +178,52 @@ export default function App() {
           </div>
         )}
 
-        {/* First-run prompt */}
-        {noJobsYet && (
-          <div className="mb-4 p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-sm text-amber-800 dark:text-amber-300">
-            <strong>No jobs yet.</strong> Add{' '}
-            <code className="font-mono bg-amber-100 dark:bg-amber-900/40 px-1 rounded">ADZUNA_APP_ID</code> +{' '}
-            <code className="font-mono bg-amber-100 dark:bg-amber-900/40 px-1 rounded">ADZUNA_APP_KEY</code>{' '}
-            to <code className="font-mono bg-amber-100 dark:bg-amber-900/40 px-1 rounded">server/.env</code> then click{' '}
-            <strong>↻ Fetch Latest</strong>.
+        {/* First-run / warming-up state */}
+        {noJobsYet && refreshing && (
+          <div className="py-16 flex flex-col items-center text-center">
+            <div className="relative mb-5">
+              <svg className="w-10 h-10 text-sand-300 dark:text-sand-600 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+              </svg>
+            </div>
+            <p className="font-semibold text-sand-700 dark:text-sand-300 mb-2 text-base">
+              Gathering jobs for you…
+            </p>
+            <p className="text-sm text-sand-400 dark:text-sand-500 max-w-sm mb-5">
+              Scanning job boards for the latest IT roles. This takes about 30–60 seconds on first load.
+            </p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {['Adzuna', 'Remotive', 'Arbeitnow', 'RemoteOK'].map((src) => (
+                <span
+                  key={src}
+                  className="text-xs px-2.5 py-1 rounded-full bg-sand-100 dark:bg-sand-800 text-sand-500 dark:text-sand-400 animate-pulse"
+                >
+                  {src}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {noJobsYet && !refreshing && (
+          <div className="py-16 flex flex-col items-center text-center">
+            <div className="mb-4 w-12 h-12 rounded-2xl bg-sand-100 dark:bg-sand-800 flex items-center justify-center">
+              <svg className="w-6 h-6 text-sand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2 2v0" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2" />
+              </svg>
+            </div>
+            <p className="font-semibold text-sand-700 dark:text-sand-300 mb-1">No jobs loaded yet</p>
+            <p className="text-sm text-sand-400 dark:text-sand-500 mb-5 max-w-xs">
+              Jobs are fetched automatically on startup. Click below if nothing appears after a minute.
+            </p>
+            <button
+              onClick={refresh}
+              className="px-4 py-2 rounded-lg bg-sand-800 dark:bg-sand-100 text-white dark:text-sand-900 text-sm font-semibold hover:opacity-90 transition-opacity"
+            >
+              Fetch Jobs Now
+            </button>
           </div>
         )}
 

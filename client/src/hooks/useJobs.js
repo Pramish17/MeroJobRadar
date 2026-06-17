@@ -9,9 +9,13 @@ export function useJobs(filters = {}) {
   const [error, setError] = useState(null);
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
 
-  // Avoid stale closures when filters change
   const filtersRef = useRef(filters);
   filtersRef.current = filters;
+
+  const statsRef = useRef(stats);
+  statsRef.current = stats;
+
+  const autoFetchedRef = useRef(false);
 
   const fetchJobs = useCallback(async (overrideFilters) => {
     setLoading(true);
@@ -36,12 +40,12 @@ export function useJobs(filters = {}) {
     try {
       const s = await getStats();
       setStats(s);
+      return s;
     } catch {
-      // Stats failure is non-critical
+      return null;
     }
   }, []);
 
-  // Re-fetch when filters change
   useEffect(() => {
     fetchJobs(filters);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -56,7 +60,6 @@ export function useJobs(filters = {}) {
     filters.limit,
   ]);
 
-  // Fetch stats on mount
   useEffect(() => {
     fetchStats();
   }, [fetchStats]);
@@ -74,17 +77,36 @@ export function useJobs(filters = {}) {
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
+    const startingFromEmpty = (statsRef.current?.total ?? 0) === 0;
     try {
       await refreshJobs();
-      // Poll for 15 seconds to pick up new data
-      await new Promise((resolve) => setTimeout(resolve, 8000));
-      await Promise.all([fetchJobs(filters), fetchStats()]);
+      if (startingFromEmpty) {
+        // Poll every 10s for up to 3 minutes waiting for the first scrape to complete
+        for (let i = 0; i < 18; i++) {
+          await new Promise((r) => setTimeout(r, 10000));
+          const s = await fetchStats();
+          if (s?.total > 0) {
+            await fetchJobs(filtersRef.current);
+            return;
+          }
+        }
+      } else {
+        await new Promise((r) => setTimeout(r, 8000));
+        await Promise.all([fetchJobs(filtersRef.current), fetchStats()]);
+      }
     } catch (err) {
       setError(err.message);
     } finally {
       setRefreshing(false);
     }
-  }, [filters, fetchJobs, fetchStats]);
+  }, [fetchJobs, fetchStats]);
+
+  // Auto-trigger first fetch when the DB is empty
+  useEffect(() => {
+    if (!stats || stats.total > 0 || refreshing || autoFetchedRef.current) return;
+    autoFetchedRef.current = true;
+    handleRefresh();
+  }, [stats, refreshing, handleRefresh]);
 
   return {
     jobs,
