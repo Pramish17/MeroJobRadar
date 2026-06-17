@@ -171,8 +171,8 @@ export default function App() {
           </button>
         </div>
 
-        {/* Error */}
-        {error && (
+        {/* Error — suppressed while doing the initial warming-up fetch */}
+        {error && !(noJobsYet && refreshing) && (
           <div className="mb-4 p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-sm text-red-700 dark:text-red-400">
             <strong>Error:</strong> {error}
           </div>

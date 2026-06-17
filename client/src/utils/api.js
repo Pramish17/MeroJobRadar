@@ -33,6 +33,16 @@ export function toggleSave(id) {
   return request(`/jobs/${id}/save`, { method: 'POST' });
 }
 
-export function refreshJobs() {
-  return request('/jobs/refresh', { method: 'POST' });
+export async function refreshJobs() {
+  const res = await fetch(`${BASE}/jobs/refresh`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  // 409 means a fetch is already in progress — treat as success, caller will poll
+  if (res.status === 409) return { alreadyRunning: true };
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(err.error || `HTTP ${res.status}`);
+  }
+  return res.json();
 }
