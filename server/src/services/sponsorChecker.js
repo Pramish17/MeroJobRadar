@@ -208,7 +208,10 @@ export function checkSponsorship(companyName) {
 
 /**
  * Global sponsorship check: UK register match OR explicit mention in description.
+ * Negative phrases in the description always block, even if the company is on the register.
  */
 export function checkSponsorshipGlobal(companyName, description = '') {
+  const lower = description.toLowerCase();
+  if (NEGATIVE_PHRASES.some((phrase) => lower.includes(phrase))) return false;
   return checkSponsorship(companyName) || checkSponsorshipFromText(description);
 }
