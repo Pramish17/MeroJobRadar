@@ -64,7 +64,7 @@ export async function runJobFetch() {
     const allJobs = [...adzunaJobs, ...remotiveJobs, ...arbeitnowJobs, ...remoteOkJobs];
 
     for (const job of allJobs) {
-      job.sponsorship = checkSponsorshipGlobal(job.company, job.description);
+      job.sponsorship = checkSponsorshipGlobal(job.company, job.description, job.location);
       if (job.sponsorship) summary.sponsors++;
 
       const inserted = insertJob(job);

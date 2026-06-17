@@ -108,13 +108,13 @@ export async function loadSponsorList() {
   }
 }
 
+// UK-specific sponsorship keywords only (removed H1B which is US-specific)
 const SPONSORSHIP_KEYWORDS = [
   'visa sponsorship', 'visa sponsored', 'sponsor visa', 'sponsoring visa',
   'work permit sponsorship', 'certificate of sponsorship', 'skilled worker visa',
   'global talent visa', 'sponsorship available', 'sponsorship provided',
   'we sponsor', 'will sponsor', 'can sponsor', 'able to sponsor',
-  'visa support', 'relocation support', 'right to work sponsorship',
-  'h1b', 'h-1b', 'tier 2', 'tier2',
+  'right to work sponsorship', 'tier 2', 'tier2',
 ];
 
 // Explicit negative compound phrases — checked before any keyword match
@@ -180,26 +180,58 @@ export function checkSponsorshipFromText(description = '') {
   return false;
 }
 
+// UK city/region indicators used to decide if a job is UK-based
+const UK_LOCATION_WORDS = [
+  'london', 'manchester', 'birmingham', 'glasgow', 'edinburgh', 'cardiff',
+  'belfast', 'leeds', 'bristol', 'sheffield', 'liverpool', 'nottingham',
+  'newcastle', 'reading', 'cambridge', 'oxford', 'brighton', 'coventry',
+  'united kingdom', 'england', 'scotland', 'wales', ' uk', '(uk)',
+];
+
+export function isUKBased(location = '') {
+  const lower = location.toLowerCase();
+  return UK_LOCATION_WORDS.some((w) => lower.includes(w));
+}
+
+// Strips agency/department suffixes so "Harnham - Data & Analytics Recruitment"
+// becomes "harnham", matching the register entry.
+function extractCoreName(companyName) {
+  return companyName
+    .split(/\s+[-–|/]\s+/)[0]   // take part before " - ", " – ", " | ", " / "
+    .replace(/\s+(ltd|limited|plc|llp|llc|inc|corp|uk|group|holdings?|recruitment|staffing|consulting|solutions|services|technologies|technology|tech)\.?\s*$/i, '')
+    .toLowerCase()
+    .trim();
+}
+
 /**
  * Check if a company is on the UK visa sponsor register.
- * Tries exact match, then stripped suffix match, then substring match.
+ * Tries exact, core-name, suffix-stripped, then substring match.
  */
 export function checkSponsorship(companyName) {
   if (!sponsorSet || sponsorSet.size === 0) return false;
 
   const name = companyName.toLowerCase().trim();
+  const core = extractCoreName(companyName);
 
+  // Exact full name
   if (sponsorSet.has(name)) return true;
 
-  const cleaned = name
-    .replace(/\s+(ltd|limited|plc|llp|llc|inc|corp|uk|group|holdings?)\.?$/i, '')
-    .trim();
+  // Core name (before " - " separator)
+  if (core && core !== name && sponsorSet.has(core)) return true;
 
+  // Suffix-stripped full name
+  const cleaned = name
+    .replace(/\s+(ltd|limited|plc|llp|llc|inc|corp|uk|group|holdings?)\.?\s*$/i, '')
+    .trim();
   if (cleaned !== name && sponsorSet.has(cleaned)) return true;
 
-  for (const sponsor of sponsorSet) {
-    if (sponsor.includes(cleaned) || cleaned.includes(sponsor)) {
-      if (cleaned.length >= 4 && sponsor.length >= 4) return true;
+  // Substring match using the shorter core name (more precise)
+  const lookup = core || cleaned;
+  if (lookup.length >= 4) {
+    for (const sponsor of sponsorSet) {
+      if (sponsor.length >= 4 && (sponsor === lookup || sponsor.startsWith(lookup + ' ') || lookup.startsWith(sponsor + ' '))) {
+        return true;
+      }
     }
   }
 
@@ -207,11 +239,15 @@ export function checkSponsorship(companyName) {
 }
 
 /**
- * Global sponsorship check: UK register match OR explicit mention in description.
- * Negative phrases in the description always block, even if the company is on the register.
+ * Global sponsorship check.
+ * - UK register match: only for UK-located jobs (location param required to be UK)
+ * - Keyword match: for any job, but only UK-specific keywords
+ * - Negative phrases always block, even if company is on the register.
  */
-export function checkSponsorshipGlobal(companyName, description = '') {
+export function checkSponsorshipGlobal(companyName, description = '', location = '') {
   const lower = description.toLowerCase();
   if (NEGATIVE_PHRASES.some((phrase) => lower.includes(phrase))) return false;
-  return checkSponsorship(companyName) || checkSponsorshipFromText(description);
+
+  if (isUKBased(location) && checkSponsorship(companyName)) return true;
+  return checkSponsorshipFromText(description);
 }

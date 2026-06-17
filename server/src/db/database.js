@@ -179,15 +179,14 @@ export function getStats() {
 
 export function updateSponsorships(checkFn) {
   const db = getDb();
-  // Fetch id, company, description so checkFn can do both register + keyword matching
-  const jobs = db.prepare(`SELECT id, company, description FROM jobs`).all();
+  const jobs = db.prepare(`SELECT id, company, description, location FROM jobs`).all();
 
   const updateStmt = db.prepare(`UPDATE jobs SET sponsorship = ? WHERE id = ?`);
 
   const updateAll = db.transaction(() => {
     let sponsored = 0;
-    for (const { id, company, description } of jobs) {
-      const isSponsored = checkFn(company, description) ? 1 : 0;
+    for (const { id, company, description, location } of jobs) {
+      const isSponsored = checkFn(company, description, location) ? 1 : 0;
       updateStmt.run(isSponsored, id);
       if (isSponsored) sponsored++;
     }
